@@ -1,0 +1,885 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>BCSentinel</title>
+<style>
+/* ============================================================
+   DESIGN PLAN — v4, signal-intelligence terminal
+   Pivot from v3: warm "fintech glass" read as safe, not
+   disruptive. New direction commits fully to a live-intelligence
+   terminal: void-black ground, electric cyan (detection) + violet
+   (intelligence/inference) run hot and saturated, nothing warm.
+   The hero is a working instrument — a typing signal feed and a
+   rotating radar ring over the formation network, not a static
+   headline. Validation becomes a drawn radial chart, not a table.
+   Type: Space-engineered pairing — Bricolage Grotesque (huge,
+   compressed display) / IBM Plex Mono as the DOMINANT voice
+   (labels, data, feed, nav) / IBM Plex Sans only for long-form
+   body copy, kept deliberately minimal.
+
+   v4.1 motion pass — same palette/content, pushed considerably
+   faster and busier per feedback that v4 still read as static:
+   denser/faster network graph, a scanning HUD line across the
+   hero, cursor-reactive tilt on every glass card, an ambient
+   cursor spotlight, a scramble-decode reveal on the headline,
+   and faster timing on the donut draw-in and rail sweep.
+
+   v4.2 — dropped the light theme entirely; void-black is now the
+   only background, always on (no longer gated behind OS dark
+   mode), because the OS-conditional palette meant most visitors
+   never saw the terminal aesthetic at all. Removed the rotating
+   radar rings (read as generic sonar, not on-brand) and replaced
+   that motion with the real idea: a sparse set of points in the
+   hero network periodically drawing a new connection between
+   them — a bright head travels from one node to the next, holds,
+   then fades — literally "formation" happening in the graph
+   itself. Slowed the live signal-feed typewriter back down; v4.1
+   had rushed it.
+
+   v4.3 — dropped the scanning HUD line (didn't land). Reworked
+   the forming-connections into something quantum rather than a
+   signal ping: short-range only, drawn as a faint wavering
+   thread with a couple of soft shimmer-points along it instead
+   of a straight line. Then: institutional elegance pass — this
+   is a product for large institutions, not a game HUD. Slowed
+   and smoothed every bit of motion that was reading as flashy —
+   deterministic, slow shimmer instead of per-frame flicker,
+   longer holds, subtler tilt, a quieter ambient glow — same
+   palette and content, more restraint.
+
+   v4.4 — the static triangulated mesh (every node linked to every
+   nearby node by a flat grey line) read as slow and generic, not
+   an intelligence product. Replaced it entirely: nodes are dim
+   luminous points at rest; a shifting set of light-connections
+   forms between them (short local ones and a few longer ones
+   sweeping further), drawn with additive blending so wherever
+   threads cross or cluster near a point they genuinely brighten
+   — not a simulated highlight, the canvas compositing itself —
+   then each connection fades and lets go rather than staying
+   fixed. More connections alive at once than before, so the
+   network reads as busy and alive, not sparse.
+
+   v4.5 — the sine-wobble on those connections read as organic,
+   not technical ("looks like sperm" — correct complaint). Dropped
+   the wobble entirely. Replaced with straight light-shots: a
+   spark launches from a point in a straight line, leaves a
+   fading trail, and flashes every node its path passes near —
+   several flashes landing close together brighten into one
+   bigger point via the same additive blending, which is the
+   "points merging into a bigger point" idea without hand-coding
+   a merge. No curves anywhere in the network now, only straight
+   lines and points.
+   ============================================================ */
+:root{
+  --bg:#000000; --bg-raised:#0a0d12; --panel-line:#1c232e;
+  --fg:#f3f7f6; --fg-dim:#93a0b0;
+  --cyan:#2bf0e0; --cyan-glow:rgba(43,240,224,.5);
+  --violet:#a56bff; --violet-glow:rgba(165,107,255,.45);
+  --warn:#ff7a5c;
+  --mono-dim:#6a768a; --glass:rgba(10,13,18,.55); --glass-brd:rgba(255,255,255,.12);
+  --noise-op:.045;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{
+  margin:0; color:var(--fg); position:relative;
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  font-size:16px; line-height:1.6; overflow-x:hidden;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif; text-wrap:balance; margin:0}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+a{color:inherit}
+img{max-width:100%}
+
+body::after{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:999;
+  opacity:var(--noise-op); mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+.aurora{position:fixed; inset:-10% -10% auto -10%; height:150vh; z-index:0; pointer-events:none; overflow:hidden; display:block}
+.aurora span{position:absolute; border-radius:50%; filter:blur(80px); opacity:.5; will-change:transform}
+.aurora .b1{width:50vw; height:50vw; left:-10vw; top:-6vh; background:radial-gradient(circle, var(--cyan-glow), transparent 70%); animation:drift1 24s ease-in-out infinite}
+.aurora .b2{width:42vw; height:42vw; right:-8vw; top:8vh; background:radial-gradient(circle, var(--violet-glow), transparent 70%); animation:drift2 30s ease-in-out infinite}
+@keyframes drift1{0%,100%{transform:translate(0,0)} 50%{transform:translate(5vw,7vh)}}
+@keyframes drift2{0%,100%{transform:translate(0,0)} 50%{transform:translate(-6vw,5vh)}}
+@media (prefers-reduced-motion:reduce){ .aurora span{animation:none} }
+
+.spotlight{position:fixed; inset:0; z-index:3; pointer-events:none; display:block; opacity:.3; mix-blend-mode:screen; background:radial-gradient(520px circle at var(--sx,50%) var(--sy,50%), var(--cyan-glow), transparent 70%)}
+@media (prefers-reduced-motion:reduce){ .spotlight{display:none !important} }
+
+.content{position:relative; z-index:1}
+.wrap{max-width:960px; margin:0 auto}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace; font-size:.75rem; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--cyan); margin:0 0 1rem;
+  display:flex; align-items:center; gap:.55rem;
+}
+.eyebrow::before{content:""; width:7px; height:7px; background:var(--cyan); box-shadow:0 0 12px 2px var(--cyan-glow); flex-shrink:0}
+section{position:relative; padding-block:clamp(3.8rem,9vw,6.8rem)}
+p{color:var(--fg-dim); max-width:62ch}
+p.lede{color:var(--fg); font-size:1.12rem; max-width:58ch}
+.section-h{font-size:clamp(1.8rem,4.2vw,2.6rem); font-weight:700; letter-spacing:-.02em; line-height:1.06}
+
+.glass{background:var(--glass); backdrop-filter:blur(20px) saturate(150%); -webkit-backdrop-filter:blur(20px) saturate(150%); border:1px solid var(--glass-brd); border-radius:8px}
+.hud{position:relative}
+.hud::before,.hud::after,.hud .c3,.hud .c4{content:""; position:absolute; width:14px; height:14px; border:1.5px solid var(--cyan); opacity:.7; pointer-events:none}
+.hud::before{top:-1px; left:-1px; border-right:none; border-bottom:none}
+.hud::after{top:-1px; right:-1px; border-left:none; border-bottom:none}
+.hud .c3{bottom:-1px; left:-1px; border-right:none; border-top:none}
+.hud .c4{bottom:-1px; right:-1px; border-left:none; border-top:none}
+
+header.top{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding-block:1.2rem; max-width:960px; margin:0 auto; position:relative; z-index:5;
+  font-family:"IBM Plex Mono",monospace; font-size:.8rem;
+}
+header.top .mark{letter-spacing:.03em; color:var(--fg); font-weight:600; display:flex; align-items:center; gap:.55rem; font-size:.95rem}
+header.top .mark .px{width:9px; height:9px; background:var(--cyan); box-shadow:0 0 16px 3px var(--cyan-glow); animation:blink 1.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1} 50%{opacity:.35}}
+header.top .mark b{color:var(--cyan); font-family:"Bricolage Grotesque",sans-serif}
+header.top nav{display:flex; gap:1.6rem; color:var(--fg-dim)}
+header.top nav a{text-decoration:none; border-bottom:1px solid transparent; transition:color .15s}
+header.top nav a:hover{color:var(--cyan); border-color:var(--cyan)}
+@media (max-width:640px){ header.top nav{display:none} }
+
+/* ---- hero ---- */
+.hero{overflow:hidden; padding-top:clamp(1.4rem,6vw,2.6rem)}
+.hero-stage{position:relative; border-radius:12px; overflow:hidden; min-height:min(90vw,600px); display:flex; align-items:flex-end}
+#netCanvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+.hero-scrim{position:absolute; inset:0; background:linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--bg) 60%, transparent) 58%, var(--bg) 97%)}
+.hero-copy{position:relative; z-index:2; padding:clamp(1.8rem,5vw,3.4rem); width:100%}
+.kicker{font-family:"IBM Plex Mono",monospace; font-size:.8rem; letter-spacing:.22em; text-transform:uppercase; color:var(--violet); margin-bottom:1.1rem; display:block}
+.hero h1{font-size:clamp(1.9rem,4.4vw,3rem); font-weight:700; line-height:1.18; letter-spacing:-.015em; max-width:36ch}
+.hero h1 .gline{display:block; opacity:0; transform:translateY(.4em); animation:lineUp .8s cubic-bezier(.2,.7,.2,1) forwards}
+.hero h1 .gline:nth-child(1){animation-delay:.05s}
+.hero h1 .gline:nth-child(2){animation-delay:.18s}
+.hero h1 .gline:nth-child(3){animation-delay:.31s}
+@keyframes lineUp{to{opacity:1; transform:none}}
+@media (prefers-reduced-motion:reduce){ .hero h1 .gline{animation:none; opacity:1; transform:none} }
+.hero h1 em{
+  font-style:normal; background:linear-gradient(100deg,var(--cyan),var(--violet) 45%,var(--cyan) 90%);
+  background-size:220% 100%; animation:gradientShift 3.6s ease-in-out infinite;
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 0 26px var(--cyan-glow));
+}
+@keyframes gradientShift{0%,100%{background-position:0% 50%} 50%{background-position:100% 50%}}
+@media (prefers-reduced-motion:reduce){ .hero h1 em{animation:none} }
+.hero-tagline{font-family:"IBM Plex Mono",monospace; font-size:.82rem; letter-spacing:.04em; color:var(--fg-dim); margin-top:1rem}
+.hero .lede{margin-top:1.5rem}
+.cta-row{display:flex; gap:1rem; align-items:center; margin-top:2.1rem; flex-wrap:wrap}
+.btn{
+  --mx:50%; --my:50%; position:relative; overflow:hidden;
+  display:inline-flex; align-items:center; gap:.5rem;
+  background:var(--cyan); color:#021014; text-decoration:none;
+  font-family:"IBM Plex Mono",monospace; font-size:.85rem; font-weight:600;
+  padding:.9rem 1.4rem; border-radius:3px; letter-spacing:.02em;
+  box-shadow:0 0 0 0 var(--cyan-glow); transition:box-shadow .25s, transform .2s;
+}
+.btn::before{content:""; position:absolute; inset:0; opacity:0; transition:opacity .25s; background:radial-gradient(120px circle at var(--mx) var(--my), rgba(255,255,255,.4), transparent 60%)}
+.btn:hover{box-shadow:0 0 34px 4px var(--cyan-glow); transform:translateY(-1px)}
+.btn:hover::before{opacity:1}
+.btn.ghost{background:transparent; color:var(--fg); border:1px solid var(--glass-brd); box-shadow:none}
+.btn.ghost:hover{border-color:var(--violet); color:var(--violet)}
+
+/* ---- live signal feed (hero terminal) ---- */
+.feed-wrap{margin-top:2.2rem; padding:1.1rem 1.3rem; max-width:620px}
+.feed-cap{font-family:"IBM Plex Mono",monospace; font-size:.68rem; letter-spacing:.1em; color:var(--fg-dim); text-transform:uppercase; margin-bottom:.6rem; display:flex; justify-content:space-between}
+.feed-cap .live{color:var(--cyan)}
+#feedLines{font-family:"IBM Plex Mono",monospace; font-size:.78rem; line-height:1.9; min-height:5.2rem; color:var(--fg-dim)}
+#feedLines .ln{display:block; white-space:pre}
+#feedLines .ln .k{color:var(--cyan)}
+#feedLines .ln .v{color:var(--fg)}
+#feedLines .cursor{display:inline-block; width:7px; height:1em; background:var(--cyan); vertical-align:text-bottom; animation:blink 1s step-end infinite}
+
+/* ---- rail ---- */
+.rail{display:flex; align-items:center; margin-top:2.4rem; max-width:620px}
+.rail .seg{flex:1; height:2px; background:var(--panel-line); position:relative; overflow:hidden; border-radius:2px}
+.rail .seg.on{background:linear-gradient(90deg,var(--cyan),var(--violet))}
+.rail .seg.on::after{content:""; position:absolute; inset:0; width:40%; background:linear-gradient(90deg,transparent,#fffb,transparent); animation:sweep 1.1s linear infinite}
+@keyframes sweep{from{transform:translateX(-120%)} to{transform:translateX(320%)}}
+.node{display:flex; flex-direction:column; align-items:center; gap:.4rem; font-family:"IBM Plex Mono",monospace; font-size:.72rem; color:var(--fg-dim); flex-shrink:0}
+.node .dot{width:11px; height:11px; border-radius:50%; border:2px solid var(--panel-line); background:var(--bg)}
+.node.t1 .dot{border-color:var(--cyan)}
+.node.t2 .dot{border-color:var(--cyan); background:var(--cyan); box-shadow:0 0 12px 2px var(--cyan-glow)}
+.node.t3 .dot{border-color:var(--violet); background:var(--violet); box-shadow:0 0 12px 2px var(--violet-glow)}
+.node .lbl{color:var(--fg); font-weight:600}
+@media (prefers-reduced-motion:reduce){ .rail .seg.on::after{animation:none} }
+
+/* ---- method bento ---- */
+.method-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:2.6rem; perspective:1000px}
+.method-card{padding:1.6rem; transition:transform .25s, border-color .25s}
+.method-card:hover{transform:translateY(-3px); border-color:var(--cyan)}
+.method-card .tag{font-family:"IBM Plex Mono",monospace; font-size:.72rem; color:var(--cyan); letter-spacing:.09em}
+.method-card:nth-child(3) .tag{color:var(--violet)}
+.method-card h3{font-size:1.1rem; margin-top:.65rem; font-weight:700}
+.method-card p{font-size:.92rem; margin-top:.6rem}
+@media (max-width:680px){ .method-grid{grid-template-columns:1fr} }
+
+.principle{margin-top:2.3rem; padding:1.5rem 1.7rem; border-left:3px solid var(--cyan); box-shadow:-3px 0 32px -10px var(--cyan-glow)}
+.principle p{color:var(--fg); margin:0; font-size:1rem}
+.principle p + p{margin-top:.75rem; color:var(--fg-dim); font-size:.9rem}
+
+/* ---- validation: stats + radial chart ---- */
+.stat-row{display:flex; gap:clamp(1.4rem,5vw,3.6rem); flex-wrap:wrap; margin-top:2.2rem}
+.stat b{display:block; font-family:"IBM Plex Mono",monospace; font-size:clamp(2.2rem,6vw,3rem); font-weight:600; font-variant-numeric:tabular-nums; color:var(--fg)}
+.stat span{font-family:"IBM Plex Mono",monospace; font-size:.74rem; color:var(--fg-dim); text-transform:uppercase; letter-spacing:.06em}
+
+.radial-wrap{margin-top:2.6rem; padding:1.8rem; display:grid; grid-template-columns:260px 1fr; gap:2rem; align-items:center}
+.radial-wrap svg{width:100%; height:auto; display:block}
+#donutSvg{animation:donutPulse 2.8s ease-in-out infinite}
+@keyframes donutPulse{0%,100%{filter:drop-shadow(0 0 0 transparent)} 50%{filter:drop-shadow(0 0 16px var(--cyan-glow))}}
+@media (prefers-reduced-motion:reduce){ #donutSvg{animation:none} }
+.radial-legend{display:flex; flex-direction:column; gap:.85rem}
+.leg-row{display:grid; grid-template-columns:14px 1fr auto; align-items:center; gap:.65rem; font-size:.9rem}
+.leg-row .dot{width:10px; height:10px; border-radius:2px}
+.leg-row .n{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; color:var(--fg); font-weight:600}
+.leg-ex{grid-column:2 / span 2; color:var(--fg-dim); font-size:.8rem; margin-top:-.4rem}
+.c-active{background:var(--cyan)} .c-d1{background:var(--warn)} .c-d2{background:var(--warn); opacity:.7} .c-d3{background:var(--mono-dim)} .c-d4{background:var(--mono-dim); opacity:.6}
+@media (max-width:720px){ .radial-wrap{grid-template-columns:1fr} }
+.docket-note{margin-top:1.8rem; font-size:.86rem}
+
+/* ---- manifesto break ---- */
+.manifesto-line{font-family:"Bricolage Grotesque",sans-serif; font-weight:700; font-size:clamp(1.5rem,3.6vw,2.4rem); line-height:1.3; letter-spacing:-.01em; color:var(--fg-dim); margin:0 0 2.6rem; max-width:none}
+.manifesto-line:last-child{margin-bottom:0}
+.manifesto-line .hl{display:block; margin-top:.35rem; background:linear-gradient(100deg,var(--cyan),var(--violet) 70%); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 0 20px var(--cyan-glow))}
+.manifesto-line .trail{display:block; margin-top:.3rem; font-weight:400; font-size:.6em; color:var(--mono-dim); letter-spacing:.3em}
+
+/* ---- verification ---- */
+.verify-grid{display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; margin-top:2.4rem; perspective:1000px}
+.verify-card{padding:1.6rem; transition:transform .25s, border-color .25s}
+.verify-card:hover{transform:translateY(-3px); border-color:var(--violet)}
+.verify-card h3{font-size:1.04rem; font-weight:700; display:flex; align-items:center; gap:.55rem}
+.verify-card h3::before{content:""; width:8px; height:8px; border-radius:50%; background:var(--violet); box-shadow:0 0 10px 1px var(--violet-glow); flex-shrink:0}
+.verify-card p{font-size:.93rem; margin-top:.65rem}
+.hash-chain{margin-top:1.1rem; display:flex; align-items:center; gap:0; flex-wrap:wrap; font-family:"IBM Plex Mono",monospace; font-size:.68rem; color:var(--fg-dim)}
+.hash-chain .blk{padding:.5rem .7rem; background:var(--bg-raised); border:1px solid var(--glass-brd); border-radius:4px}
+.hash-chain .blk.now{color:var(--cyan); border-color:var(--cyan); box-shadow:0 0 12px -2px var(--cyan-glow)}
+.hash-chain .arrow{padding:0 .5rem; color:var(--mono-dim)}
+@media (max-width:680px){ .verify-grid{grid-template-columns:1fr} }
+
+/* ---- audience ---- */
+.audience{margin-top:2.4rem; display:flex; flex-direction:column; gap:1rem; perspective:1000px}
+.aud-row{display:grid; grid-template-columns:140px 1fr; gap:1.2rem; padding:1.3rem 1.5rem; transition:transform .2s}
+.aud-row:hover{transform:translateX(4px)}
+.aud-row .tier{font-family:"IBM Plex Mono",monospace; font-size:.74rem; letter-spacing:.06em; color:var(--cyan); text-transform:uppercase; padding-top:.15rem}
+.aud-row:nth-child(2) .tier{color:var(--violet)}
+.aud-row:nth-child(3) .tier{color:var(--fg-dim)}
+.aud-row h3{font-size:1.05rem; font-weight:700; margin-bottom:.3rem}
+.aud-row p{font-size:.93rem; margin:0}
+@media (max-width:560px){ .aud-row{grid-template-columns:1fr; gap:.3rem} }
+
+/* ---- development ---- */
+.gen-list{margin-top:2.4rem; display:flex; flex-direction:column; gap:1rem; perspective:1000px}
+.gen-item{display:grid; grid-template-columns:90px 1fr; gap:1.1rem; align-items:baseline; padding:.9rem 1.2rem}
+.gen-item .id{font-family:"IBM Plex Mono",monospace; font-size:.78rem; color:var(--fg-dim)}
+.gen-item .name{font-weight:700; font-size:.97rem}
+.gen-item .status{font-family:"IBM Plex Mono",monospace; font-size:.72rem; margin-left:.6rem}
+.gen-item .status.done{color:var(--violet)}
+.gen-item .status.active{color:var(--cyan)}
+.gen-item .status.active::before{content:"● "}
+.gen-item .status.draft{color:var(--fg-dim)}
+.gen-item .status.draft::before{content:"○ "}
+.verify-card ul{margin:.8rem 0 0; padding-left:1.15rem; color:var(--fg-dim); font-size:.86rem; line-height:1.6}
+.verify-card ul li{margin-bottom:.4rem}
+.verify-card code, .arch-code{font-family:"IBM Plex Mono",monospace; font-size:.85em; color:var(--cyan); background:var(--bg-raised); padding:.1em .35em; border-radius:3px}
+@media (max-width:560px){ .gen-item{grid-template-columns:1fr} }
+
+.candor{margin-top:2rem; padding:1.4rem 1.6rem}
+.candor p{color:var(--fg); font-size:.95rem; margin:0}
+
+/* ---- contact ---- */
+.contact-box{margin-top:2.2rem; padding:1.9rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; background:radial-gradient(140% 160% at 100% 0%, var(--cyan-glow), transparent 60%), var(--glass)}
+.contact-box .addr{font-family:"IBM Plex Mono",monospace; font-size:1.08rem}
+.copy-btn{font-family:"IBM Plex Mono",monospace; font-size:.76rem; background:transparent; border:1px solid var(--glass-brd); color:var(--fg-dim); padding:.55rem .85rem; border-radius:3px; cursor:pointer; transition:all .15s}
+.copy-btn:hover{color:var(--fg); border-color:var(--fg-dim)}
+.copy-btn:focus-visible, a:focus-visible, .btn:focus-visible{outline:2px solid var(--cyan); outline-offset:2px}
+
+footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Plex Mono",monospace; font-size:.74rem; color:var(--fg-dim); display:flex; justify-content:space-between; flex-wrap:wrap; gap:.6rem; position:relative; z-index:1}
+
+.reveal{opacity:1; transform:none}
+@media (prefers-reduced-motion:no-preference){ .reveal-init{opacity:0; transform:translateY(16px); transition:opacity .7s ease, transform .7s ease} }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<div class="aurora" id="aurora" aria-hidden="true"><span class="b1"></span><span class="b2"></span></div>
+<div class="spotlight" id="spotlight" aria-hidden="true"></div>
+
+<div class="content">
+<header class="top">
+  <div class="mark"><span class="px"></span>BC<b>Sentinel</b></div>
+  <nav>
+    <a href="#method">Method</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#edge">The Edge</a>
+    <a href="#verification">Verification</a>
+    <a href="#audience">Who it's for</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-stage hud">
+      <span class="c3"></span><span class="c4"></span>
+      <canvas id="netCanvas" aria-hidden="true"></canvas>
+      <div class="hero-scrim"></div>
+      <div class="hero-copy">
+        <span class="kicker">// Future Formation Intelligence</span>
+        <h1>
+          <span class="gline">BCSentinel is a future formation intelligence platform</span>
+          <span class="gline">that detects formation processes before their public visibility,</span>
+          <span class="gline">delivering <em>actionable alpha</em> to institutional investors.</span>
+        </h1>
+        <p class="hero-tagline">Not a dashboard. Not analytics. An intelligence platform.</p>
+        <div class="feed-wrap glass hud"><span class="c3"></span><span class="c4"></span>
+          <div class="feed-cap"><span>ANATOMY OF A FORMATION SIGNAL — illustrative</span><span class="live">● sequence</span></div>
+          <div id="feedLines"></div>
+        </div>
+      </div>
+    </div>
+    <div class="cta-row">
+      <a class="btn" id="ctaMain" href="mailto:contact@bcsentinel.ai">Institutional inquiry →</a>
+      <a class="btn ghost" href="#architecture">See the architecture</a>
+    </div>
+    <div class="rail" aria-hidden="true">
+      <div class="node t1"><span class="dot"></span><span class="lbl">T1</span><span>first signal</span></div>
+      <div class="seg on"></div>
+      <div class="node t2"><span class="dot"></span><span class="lbl">T2</span><span>alert threshold</span></div>
+      <div class="seg on"></div>
+      <div class="node t3"><span class="dot"></span><span class="lbl">T3</span><span>public visibility</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="method">
+  <div class="wrap">
+    <p class="eyebrow">Method</p>
+    <h2 class="section-h">Formation happens in three moments. We're built to detect the first one.</h2>
+    <p class="lede" style="margin-top:1rem">Markets price what's visible. By the time a launch, a listing, or a disclosure makes a formation public, it has usually been assembling on-chain for weeks or months. That's the window we detect in — before the market has priced it.</p>
+
+    <div class="method-grid">
+      <div class="method-card glass hud"><span class="c3"></span><span class="c4"></span><p class="tag">T1 · FIRST SIGNAL</p><h3>A pattern starts</h3><p>A multisig Safe gets deployed, a role gets granted, funding starts concentrating from a small number of sources. Individually, any one of these is noise.</p></div>
+      <div class="method-card glass hud"><span class="c3"></span><span class="c4"></span><p class="tag">T2 · ALERT THRESHOLD</p><h3>The pattern corroborates</h3><p>Enough independent signals line up — deployment timing, funding concentration, entity age — that the case crosses our internal threshold for human review.</p></div>
+      <div class="method-card glass hud"><span class="c3"></span><span class="c4"></span><p class="tag">T3 · PUBLIC VISIBILITY</p><h3>The entity confirms itself</h3><p>A launch, a listing, a press mention, a verified contract. This is where most tools start looking. We measure how far ahead of this point we actually were.</p></div>
+    </div>
+
+    <div class="principle glass">
+      <p>Every classification we produce has to trace back to a specific, observable piece of on-chain evidence. If we can't point to the transaction, the contract, or the timing that justifies a score, we don't assign one.</p>
+      <p>Our engines are built to say outright when they don't have a historical basis for estimating a probability — rather than estimate one anyway.</p>
+    </div>
+  </div>
+</section>
+
+<section id="architecture">
+  <div class="wrap">
+    <p class="eyebrow">Architecture</p>
+    <h2 class="section-h">Every decision is written down before it's built. Every engine is named, not just counted.</h2>
+    <p class="lede" style="margin-top:1rem">BCSentinel isn't a model we trained and shipped — it's a documented architecture: decision records, design specifications, and a chain of investigation engines that each closed a specific, named blind spot as we found it.</p>
+
+    <div class="stat-row">
+      <div class="stat"><b data-count="15">0</b><span>architecture decision records</span></div>
+      <div class="stat"><b data-count="12">0</b><span>conceptual design specifications</span></div>
+      <div class="stat"><b data-count="21">0</b><span>system architecture specifications</span></div>
+    </div>
+
+    <div class="verify-grid">
+      <div class="verify-card glass hud"><span class="c3"></span><span class="c4"></span>
+        <h3>investigate_wallet — core classification engine</h3>
+        <p>Now in its seventh revision. Version 3 closed the blind spot that mattered most: a sophisticated actor operating through a Gnosis Safe showed up only as <code>execTransaction(...)</code> — the real action hidden inside.</p>
+        <ul>
+          <li>Safe-payload decoding — recovers the real selector inside every Safe transaction</li>
+          <li>MultiSend decoding — unpacks every batched sub-transaction independently</li>
+          <li>Economic-value extraction — converts raw transfer data into readable amounts</li>
+          <li>Contract-creation check — catches deployments with no destination address, including EIP-1167 minimal-proxy clones</li>
+        </ul>
+        <p style="margin-top:.8rem">Every wallet in our calibration set carries a direct, timestamped investigate_wallet output file — the pipeline's own evidence trail, generated as it runs, not a label applied after the fact.</p>
+      </div>
+      <div class="verify-card glass hud"><span class="c3"></span><span class="c4"></span>
+        <h3>Confidence Engine — evidence reliability</h3>
+        <p>A separate engine from the classifier above: this one scores how much to trust the evidence itself, not the size of the formation. Five independent categories, non-linear gating between them, and an explicit, severity-weighted penalty for contradictions — with full provenance kept on every input that fed the score.</p>
+      </div>
+      <div class="verify-card glass hud"><span class="c3"></span><span class="c4"></span>
+        <h3>Fraud Risk Engine — outcome classification</h3>
+        <p>Classifies what actually happened to a formation after the fact: active, legitimate wind-down, confirmed exit scam, slow insider extraction, or silent shutdown. Its silence-pattern detector was validated against a real historical case before being trusted on the rest of the dataset.</p>
+      </div>
+      <div class="verify-card glass hud"><span class="c3"></span><span class="c4"></span>
+        <h3>Organization-first prefilter — TS-002 / TS-002B</h3>
+        <p>Runs ahead of individual-wallet investigation, scanning for organizational signatures across a wider net before a candidate ever reaches the classifier. Every prefilter carries an explicit recency window, so a candidate that goes quiet doesn't sit in the queue as a false positive indefinitely.</p>
+      </div>
+    </div>
+
+    <div class="gen-list">
+      <div class="gen-item glass"><span class="id">SEL</span><span><span class="name">Selector Library — 654 calibrated selectors</span><span class="status done">production</span></span></div>
+      <div class="gen-item glass"><span class="id">ANTI</span><span><span class="name">Anti-Signal Library</span><span class="status done">production</span></span></div>
+      <div class="gen-item glass"><span class="id">EXCH</span><span><span class="name">Exchange Blacklist</span><span class="status done">production</span></span></div>
+      <div class="gen-item glass"><span class="id">INFRA</span><span><span class="name">Infrastructure Selector Library</span><span class="status draft">draft — pending validation threshold</span></span></div>
+      <div class="gen-item glass"><span class="id">DAO</span><span><span class="name">DAO Selector Library</span><span class="status draft">draft — pending validation threshold</span></span></div>
+    </div>
+
+    <p class="docket-note">A library only moves from draft to production once it clears a fixed validation threshold against real cases — we don't promote a pattern library on vibes. In parallel, a set of active prospective investigations is validating this architecture against formations happening right now, not just against history.</p>
+  </div>
+</section>
+
+<section id="adaptive">
+  <div class="wrap">
+    <p class="eyebrow">Adaptive intelligence</p>
+    <h2 class="section-h">A platform that continuously evolves.</h2>
+    <p class="lede" style="margin-top:1rem">BCSentinel is designed to evolve continuously. Every validated formation expands the platform's institutional knowledge.</p>
+    <div class="principle glass" style="margin-top:2rem">
+      <p>As new organizational structures appear across the on-chain ecosystem, the platform extends its understanding of Formation DNA and searches for previously unseen archetypes.</p>
+      <p>Rather than relying on a fixed analytical model, BCSentinel progressively strengthens how it recognizes, classifies and interprets emerging structures. Every confirmed case is retained as evidence — the platform learns cumulatively from what it has already resolved.</p>
+    </div>
+  </div>
+</section>
+
+<section id="edge">
+  <div class="wrap">
+    <p class="manifesto-line">The financial industry reacts to events.<span class="hl">BCSentinel detects formation as it emerges.</span></p>
+    <p class="manifesto-line">Markets price visibility.<span class="hl">BCSentinel detects what the market cannot yet see</span><span class="trail">......</span></p>
+  </div>
+</section>
+
+<section id="verification">
+  <div class="wrap">
+    <p class="eyebrow">Verification</p>
+    <h2 class="section-h">We don't ask you to take our word for it.</h2>
+    <p class="lede" style="margin-top:1rem">Two independent mechanisms back every case we track — one checks the claim against public sources, the other proves we didn't rewrite our own history.</p>
+
+    <div class="verify-grid">
+      <div class="verify-card glass hud"><span class="c3"></span><span class="c4"></span>
+        <h3>Cross-source confirmation</h3>
+        <p>Every candidate we track gets checked against GitHub code search, Etherscan's verified-contract registry, and DefiLlama's protocol index — three independent, public sources outside our control. A case only advances when the on-chain pattern lines up with something checkable off-chain.</p>
+      </div>
+      <div class="verify-card glass hud"><span class="c3"></span><span class="c4"></span>
+        <h3>Cryptographic sealing</h3>
+        <p>Starting this cycle, every new formation we begin tracking is sealed the moment we see it — a hash of the case record, chained to the one sealed before it, with a timestamp. If that formation becomes public later, anyone can recompute the hash and confirm it matches what we sealed.</p>
+        <div class="hash-chain">
+          <span class="blk">000000…0000</span><span class="arrow">→</span>
+          <span class="blk">0b88f4…1a7c</span><span class="arrow">→</span>
+          <span class="blk now">7f3a1c…e92d</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="audience">
+  <div class="wrap">
+    <p class="eyebrow">Institutional markets</p>
+    <h2 class="section-h">Built for the organizations that move institutional capital.</h2>
+
+    <div class="verify-grid" style="margin-top:2.4rem">
+      <div class="verify-card glass hud"><span class="c3"></span><span class="c4"></span>
+        <h3>Investment Institutions</h3>
+        <ul>
+          <li>Hedge Funds &amp; Multi-Strategy Funds</li>
+          <li>Asset Managers</li>
+          <li>Sovereign Wealth Funds</li>
+          <li>Pension Funds &amp; Endowments</li>
+          <li>Private Equity &amp; Venture Capital</li>
+          <li>Investment &amp; Merchant Banks</li>
+          <li>Specialized Family Offices</li>
+          <li>Quantitative &amp; Digital Asset Investment Firms</li>
+          <li>Insurance Companies</li>
+        </ul>
+      </div>
+      <div class="verify-card glass hud"><span class="c3"></span><span class="c4"></span>
+        <h3>Digital Asset Ecosystem</h3>
+        <ul>
+          <li>Institutional &amp; Digital Asset Exchanges</li>
+          <li>Prime Brokers &amp; OTC Trading Firms</li>
+          <li>Market Makers</li>
+          <li>Blockchain &amp; Layer 1 / Layer 2 Foundations</li>
+          <li>Protocol Foundations</li>
+          <li>Stablecoin &amp; Token Issuers</li>
+          <li>Digital Asset Infrastructure Providers</li>
+        </ul>
+      </div>
+      <div class="verify-card glass hud"><span class="c3"></span><span class="c4"></span>
+        <h3>Enterprise</h3>
+        <ul>
+          <li>Tokenization Companies &amp; RWA Originators</li>
+          <li>Institutional Custodians</li>
+          <li>Financial Infrastructure &amp; Digital Asset Service Providers</li>
+          <li>Payment Networks</li>
+          <li>Enterprise Blockchain &amp; Web3 Infrastructure</li>
+          <li>Crypto Treasury Companies</li>
+          <li>FinTech Companies</li>
+        </ul>
+      </div>
+      <div class="verify-card glass hud"><span class="c3"></span><span class="c4"></span>
+        <h3>Public Sector</h3>
+        <ul>
+          <li>Central Banks</li>
+          <li>Ministries of Economy</li>
+          <li>Financial &amp; Securities Regulators</li>
+          <li>Financial Intelligence Units</li>
+          <li>National Treasury Departments</li>
+          <li>Government Digital Transformation Agencies</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="development">
+  <div class="wrap">
+    <p class="eyebrow">Where we are</p>
+    <h2 class="section-h">Built in public order, documented at every stage.</h2>
+    <p class="lede" style="margin-top:1rem">BCSentinel is developed by EMERGE as a layered build — each stage's governing documents and architecture decisions are written down before the next stage starts.</p>
+
+    <div class="gen-list">
+      <div class="gen-item glass"><span class="id">GEN-001</span><span><span class="name">Platform governance</span><span class="status done">established</span></span></div>
+      <div class="gen-item glass"><span class="id">GEN-002</span><span><span class="name">System architecture</span><span class="status done">established</span></span></div>
+      <div class="gen-item glass"><span class="id">GEN-003</span><span><span class="name">Detection methodology &amp; cognitive architecture</span><span class="status done">established</span></span></div>
+      <div class="gen-item glass"><span class="id">GEN-004</span><span><span class="name">Operational detection &amp; verification engine</span><span class="status active">active development</span></span></div>
+    </div>
+
+    <div class="candor glass">
+      <p>The historical validation above tells you how the methodology performs against formations whose outcome we already know. The next milestone is proving it holds in real time, in public, as formations happen — we're building that track record now, not claiming it yet.</p>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <p class="eyebrow">Contact</p>
+    <h2 class="section-h">Institutional inquiries</h2>
+    <p class="lede" style="margin-top:1rem">We review inquiries directly and respond to organizations we can usefully work with.</p>
+    <div class="contact-box hud"><span class="c3"></span><span class="c4"></span>
+      <span class="addr">contact@bcsentinel.ai</span>
+      <div style="display:flex; gap:.6rem">
+        <button class="copy-btn" id="copyBtn">Copy address</button>
+        <a class="btn" href="mailto:contact@bcsentinel.ai">Open email →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>BCSentinel — developed by EMERGE</span>
+  <span>Future Formation Intelligence</span>
+</footer>
+</div>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- copy button ----
+  var btn = document.getElementById('copyBtn');
+  if(btn){
+    btn.addEventListener('click', function(){
+      var text = 'contact@bcsentinel.ai';
+      function fallback(){
+        try{
+          var ta = document.createElement('textarea');
+          ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+          document.body.appendChild(ta); ta.focus(); ta.select();
+          document.execCommand('copy'); document.body.removeChild(ta);
+        }catch(e){}
+      }
+      if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).catch(fallback); }
+      else { fallback(); }
+      var old = btn.textContent; btn.textContent = 'Copied';
+      setTimeout(function(){ btn.textContent = old; }, 1600);
+    });
+  }
+
+  // ---- magnetic glow on primary CTA ----
+  var cta = document.getElementById('ctaMain');
+  if(cta && !reduceMotion){
+    cta.addEventListener('mousemove', function(e){
+      var r = cta.getBoundingClientRect();
+      cta.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      cta.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  }
+
+  // ---- cursor spotlight (dark mode ambient glow) ----
+  var spotlight = document.getElementById('spotlight');
+  if(spotlight && !reduceMotion){
+    var spotTick = false;
+    window.addEventListener('mousemove', function(e){
+      if(!spotTick){
+        requestAnimationFrame(function(){
+          spotlight.style.setProperty('--sx', e.clientX + 'px');
+          spotlight.style.setProperty('--sy', e.clientY + 'px');
+          spotTick = false;
+        });
+        spotTick = true;
+      }
+    });
+  }
+
+  // ---- pointer tilt on glass panels ----
+  var tiltEls = document.querySelectorAll('.method-card, .verify-card, .aud-row, .gen-item');
+  if(!reduceMotion && window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches){
+    tiltEls.forEach(function(el){
+      el.style.transition = 'transform .25s cubic-bezier(.2,.7,.2,1), border-color .25s';
+      el.addEventListener('mousemove', function(e){
+        var r = el.getBoundingClientRect();
+        var px = (e.clientX - r.left) / r.width - .5;
+        var py = (e.clientY - r.top) / r.height - .5;
+        el.style.transform = 'perspective(1000px) rotateX(' + (py * -3.5) + 'deg) rotateY(' + (px * 4.5) + 'deg) translateY(-3px) translateZ(4px)';
+      });
+      el.addEventListener('mouseleave', function(){ el.style.transform = ''; });
+    });
+  }
+
+  // ---- scramble-in reveal for hero headline ----
+  var glines = document.querySelectorAll('.hero h1 .gline');
+  if(glines.length && !reduceMotion){
+    var SCRAMBLE_CHARS = '01#$%&*ABCDEFGHJKLMNPQRSTUVWXYZ';
+    function scrambleIn(el, delay){
+      var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+      var textNodes = []; var tn;
+      while(tn = walker.nextNode()){ textNodes.push({node: tn, original: tn.textContent}); }
+      setTimeout(function(){
+        var frame = 0, totalFrames = 11;
+        var iv = setInterval(function(){
+          textNodes.forEach(function(entry){
+            var original = entry.original, len = original.length, out = '';
+            for(var i=0;i<len;i++){
+              if(original[i] === ' '){ out += ' '; continue; }
+              out += (i < (frame/totalFrames)*len) ? original[i] : SCRAMBLE_CHARS[Math.floor(Math.random()*SCRAMBLE_CHARS.length)];
+            }
+            entry.node.textContent = out;
+          });
+          frame++;
+          if(frame > totalFrames){
+            textNodes.forEach(function(entry){ entry.node.textContent = entry.original; });
+            clearInterval(iv);
+          }
+        }, 26);
+      }, delay);
+    }
+    glines.forEach(function(el, idx){ scrambleIn(el, 480 + idx*260); });
+  }
+
+  // ---- reveal-on-scroll ----
+  var revealEls = document.querySelectorAll('.stat, .method-card, .verify-card, .aud-row, .gen-item, .radial-wrap');
+  revealEls.forEach(function(el){ el.classList.add('reveal-init'); });
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){ entry.target.classList.add('reveal'); entry.target.classList.remove('reveal-init'); io.unobserve(entry.target); }
+      });
+    }, {threshold:.15});
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else { revealEls.forEach(function(el){ el.classList.add('reveal'); }); }
+
+  // ---- count-up stats ----
+  var counters = document.querySelectorAll('[data-count]');
+  function animateCount(el){
+    var target = parseInt(el.getAttribute('data-count'), 10) || 0;
+    if(reduceMotion){ el.textContent = target; return; }
+    var start = null, duration = 1100;
+    function step(ts){
+      if(start === null) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(eased * target);
+      if(p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  if('IntersectionObserver' in window && counters.length){
+    var cio = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){ if(entry.isIntersecting){ animateCount(entry.target); cio.unobserve(entry.target); } });
+    }, {threshold:.5});
+    counters.forEach(function(el){ cio.observe(el); });
+  } else { counters.forEach(animateCount); }
+
+  // ---- donut chart draw-in ----
+  var SEGS = [
+    {label:'active', n:25, color:'var(--cyan)'},
+    {label:'d3', n:15, color:'var(--mono-dim)'},
+    {label:'d1', n:9, color:'var(--warn)'},
+    {label:'d2', n:7, color:'var(--warn)', op:.7},
+    {label:'d4', n:3, color:'var(--mono-dim)', op:.6}
+  ];
+  var TOTAL = SEGS.reduce(function(s,x){return s+x.n;},0);
+  var R = 90, C = 2*Math.PI*R;
+  var g = document.getElementById('donutSegs');
+  var offsetAcc = 0;
+  var circles = [];
+  if(g){
+    SEGS.forEach(function(s){
+      var frac = s.n / TOTAL;
+      var len = frac * C;
+      var circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      circle.setAttribute('cx','110'); circle.setAttribute('cy','110'); circle.setAttribute('r', R);
+      circle.setAttribute('fill','none');
+      circle.setAttribute('stroke', s.color);
+      circle.setAttribute('stroke-width','20');
+      if(s.op) circle.setAttribute('opacity', s.op);
+      circle.setAttribute('stroke-dasharray', len.toFixed(2) + ' ' + (C-len).toFixed(2));
+      circle.setAttribute('stroke-dashoffset', (-offsetAcc).toFixed(2));
+      circle.style.transition = 'stroke-dasharray .6s cubic-bezier(.2,.7,.2,1)';
+      var finalDasharray = len.toFixed(2) + ' ' + (C-len).toFixed(2);
+      circle.setAttribute('data-final', finalDasharray);
+      circle.setAttribute('stroke-dasharray', '0 ' + C.toFixed(2));
+      g.appendChild(circle);
+      circles.push(circle);
+      offsetAcc += len;
+    });
+  }
+  function drawDonut(){ circles.forEach(function(c){ c.setAttribute('stroke-dasharray', c.getAttribute('data-final')); }); }
+  if('IntersectionObserver' in window && circles.length){
+    var dEl = document.getElementById('donutSvg');
+    var dio = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){ if(entry.isIntersecting){ drawDonut(); dio.unobserve(entry.target); } });
+    }, {threshold:.3});
+    if(dEl) dio.observe(dEl);
+  } else { drawDonut(); }
+
+  // ---- aurora parallax ----
+  var aurora = document.getElementById('aurora');
+  if(aurora && !reduceMotion){
+    var ticking = false;
+    window.addEventListener('scroll', function(){
+      if(!ticking){
+        requestAnimationFrame(function(){ aurora.style.transform = 'translateY(' + (window.scrollY * 0.18) + 'px)'; ticking = false; });
+        ticking = true;
+      }
+    });
+  }
+
+  // ---- live signal feed typewriter ----
+  var feedEl = document.getElementById('feedLines');
+  var SCRIPT = [
+    ['T1', 'safe deployed · 0x4e1d…c67'],
+    ['T1+2d', 'role granted · grantRole(TREASURER)'],
+    ['T1+6d', 'funding concentration · 3 sources, 12.4 ETH'],
+    ['T2', 'threshold crossed · composite 61%'],
+    ['REVIEW', 'queued for human verification']
+  ];
+  if(feedEl){
+    if(reduceMotion){
+      feedEl.innerHTML = SCRIPT.map(function(l){ return '<span class="ln"><span class="k">'+l[0]+'</span>  <span class="v">'+l[1]+'</span></span>'; }).join('');
+    } else {
+      var li = 0;
+      function typeLine(){
+        var lines = feedEl.querySelectorAll('.ln:not(.done)');
+        var container = document.createElement('span');
+        container.className = 'ln';
+        feedEl.appendChild(container);
+        var full = SCRIPT[li % SCRIPT.length];
+        var text = full[0] + '  ' + full[1];
+        var i = 0;
+        var typer = setInterval(function(){
+          container.innerHTML = '<span class="k">'+full[0]+'</span>' + text.slice(full[0].length, i) + '<span class="cursor"></span>';
+          i++;
+          if(i > text.length){
+            clearInterval(typer);
+            container.innerHTML = '<span class="k">'+full[0]+'</span>  <span class="v">'+full[1]+'</span>';
+            container.classList.add('done');
+            while(feedEl.children.length > 3){ feedEl.removeChild(feedEl.firstChild); }
+            li++;
+            setTimeout(typeLine, 1000);
+          }
+        }, 32);
+      }
+      typeLine();
+    }
+  }
+
+  // ---- hero network canvas ----
+  var canvas = document.getElementById('netCanvas');
+  if(canvas && canvas.getContext){
+    var ctx = canvas.getContext('2d');
+    var wrap = canvas.parentElement;
+    var W=0, H=0, DPR = Math.min(window.devicePixelRatio || 1, 2);
+    var nodes = [];
+    var N = 64;
+    var shots = [];
+
+    function getCol(){
+      var cs = getComputedStyle(document.documentElement);
+      return { cyan: cs.getPropertyValue('--cyan').trim()||'#2bf0e0', violet: cs.getPropertyValue('--violet').trim()||'#a56bff', line: cs.getPropertyValue('--panel-line').trim()||'#1a212b' };
+    }
+    function resize(){
+      W = wrap.clientWidth; H = wrap.clientHeight;
+      canvas.width = W*DPR; canvas.height = H*DPR; canvas.style.width=W+'px'; canvas.style.height=H+'px';
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+    }
+    function initNodes(){
+      nodes = [];
+      for(var i=0;i<N;i++){ nodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.55,vy:(Math.random()-.5)*.55,r:1.1+Math.random()*1.7,flash:0}); }
+    }
+    function hexA(hex,a){ if(hex.indexOf('#')!==0) return hex; var h=hex.replace('#',''); if(h.length===3) h=h.split('').map(function(c){return c+c;}).join(''); var r=parseInt(h.substr(0,2),16),gg=parseInt(h.substr(2,2),16),b=parseInt(h.substr(4,2),16); return 'rgba('+r+','+gg+','+b+','+a+')'; }
+    function draw(){
+      var col = getCol();
+      ctx.clearRect(0,0,W,H);
+      ctx.globalCompositeOperation = 'lighter';
+
+      nodes.forEach(function(n){
+        var boost = n.flash || 0;
+        var rr = n.r + boost*2.8;
+        ctx.beginPath();
+        ctx.fillStyle = hexA(col.cyan, .2 + boost*.6);
+        ctx.shadowColor = col.cyan; ctx.shadowBlur = 3 + boost*10;
+        ctx.arc(n.x, n.y, rr, 0, Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+
+      shots.forEach(function(sh){
+        var tailLen = 50;
+        var tx = sh.x - sh.dx*tailLen, ty = sh.y - sh.dy*tailLen;
+        var grad = ctx.createLinearGradient(tx, ty, sh.x, sh.y);
+        grad.addColorStop(0, hexA(sh.color, 0));
+        grad.addColorStop(1, hexA(sh.color, sh.alpha));
+        ctx.beginPath();
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.1;
+        ctx.shadowColor = sh.color; ctx.shadowBlur = 8;
+        ctx.moveTo(tx, ty);
+        ctx.lineTo(sh.x, sh.y);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.beginPath(); ctx.fillStyle = hexA(sh.color, sh.alpha); ctx.shadowColor = sh.color; ctx.shadowBlur = 10;
+        ctx.arc(sh.x, sh.y, 1.5, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0;
+      });
+
+      ctx.globalCompositeOperation = 'source-over';
+    }
+    function tick(){
+      nodes.forEach(function(n){
+        n.x+=n.vx; n.y+=n.vy;
+        if(n.x<0||n.x>W) n.vx*=-1;
+        if(n.y<0||n.y>H) n.vy*=-1;
+        n.flash = (n.flash || 0) * .87;
+      });
+      if(!reduceMotion && shots.length < 3 && nodes.length && Math.random() < .035){
+        var origin = nodes[Math.floor(Math.random()*nodes.length)];
+        var ang = Math.random()*Math.PI*2;
+        var pc = getCol();
+        shots.push({ x:origin.x, y:origin.y, dx:Math.cos(ang), dy:Math.sin(ang), speed:3+Math.random()*1.6, age:0, life:95, alpha:.9, color:(Math.random()<.5?pc.cyan:pc.violet) });
+      }
+      shots.forEach(function(sh){
+        sh.x += sh.dx*sh.speed;
+        sh.y += sh.dy*sh.speed;
+        sh.age++;
+        var lifeT = sh.age/sh.life;
+        sh.alpha = .9 * (1 - Math.max(0, (lifeT-0.65)/0.35));
+        nodes.forEach(function(n){
+          var ddx=n.x-sh.x, ddy=n.y-sh.y;
+          if(ddx*ddx+ddy*ddy < 170){ n.flash = Math.min(1, (n.flash||0) + .9); }
+        });
+      });
+      shots = shots.filter(function(sh){ return sh.age < sh.life && sh.x > -80 && sh.x < W+80 && sh.y > -80 && sh.y < H+80; });
+      draw();
+      if(!reduceMotion) requestAnimationFrame(tick);
+    }
+    resize(); initNodes(); draw();
+    if(!reduceMotion){ requestAnimationFrame(tick); }
+    window.addEventListener('resize', function(){ resize(); draw(); });
+  }
+})();
+</script>
