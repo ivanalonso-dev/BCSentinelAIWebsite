@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>BCSentinel</title>
 <style>
@@ -67,12 +72,37 @@
    "points merging into a bigger point" idea without hand-coding
    a merge. No curves anywhere in the network now, only straight
    lines and points.
+
+   v5 — still read as sperm cells with a trail. Removed trails
+   entirely: free-drifting, trail-less particles at independent
+   speeds that share a brightness boost only on coincidental
+   proximity (converging alert signals, not a comet and not a
+   starfield).
+
+   v6 — removed the background network visualization entirely.
+   No points, no canvas. The accent palette also moved off
+   cyan/violet to the warm gold + emerald pair defined below, and
+   .aurora switched from a fixed (viewport-pinned) glow to an
+   absolute one that scrolls away with the page.
+
+   v7 — the two soft blurred .aurora blobs (b1/b2), still drifting
+   via CSS keyframes plus a scroll-parallax JS transform, still
+   read as floating background dots / bubbles even after v6.
+   Removed the .aurora element, its CSS (blobs, drift1/drift2
+   keyframes) and its parallax JS entirely. Nothing autonomous
+   moves in the background now. The only remaining glow is
+   .spotlight, a single soft circle that tracks the mouse cursor
+   (interactive, not a decorative floating shape) — left in place
+   since this request was scoped to "los puntos de fondo" only.
    ============================================================ */
 :root{
   --bg:#000000; --bg-raised:#0a0d12; --panel-line:#1c232e;
   --fg:#f3f7f6; --fg-dim:#93a0b0;
-  --cyan:#2bf0e0; --cyan-glow:rgba(43,240,224,.5);
-  --violet:#a56bff; --violet-glow:rgba(165,107,255,.45);
+  /* v6 — elegant/institutional palette: warm antique gold (primary) +
+     deep emerald (secondary), replacing the neon cyan/violet. Variable
+     names kept as --cyan/--violet to avoid touching every call site. */
+  --cyan:#c9a961; --cyan-glow:rgba(201,169,97,.42);
+  --violet:#2e9478; --violet-glow:rgba(46,148,120,.4);
   --warn:#ff7a5c;
   --mono-dim:#6a768a; --glass:rgba(10,13,18,.55); --glass-brd:rgba(255,255,255,.12);
   --noise-op:.045;
@@ -99,14 +129,6 @@ body::after{
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 
-.aurora{position:fixed; inset:-10% -10% auto -10%; height:150vh; z-index:0; pointer-events:none; overflow:hidden; display:block}
-.aurora span{position:absolute; border-radius:50%; filter:blur(80px); opacity:.5; will-change:transform}
-.aurora .b1{width:50vw; height:50vw; left:-10vw; top:-6vh; background:radial-gradient(circle, var(--cyan-glow), transparent 70%); animation:drift1 24s ease-in-out infinite}
-.aurora .b2{width:42vw; height:42vw; right:-8vw; top:8vh; background:radial-gradient(circle, var(--violet-glow), transparent 70%); animation:drift2 30s ease-in-out infinite}
-@keyframes drift1{0%,100%{transform:translate(0,0)} 50%{transform:translate(5vw,7vh)}}
-@keyframes drift2{0%,100%{transform:translate(0,0)} 50%{transform:translate(-6vw,5vh)}}
-@media (prefers-reduced-motion:reduce){ .aurora span{animation:none} }
-
 .spotlight{position:fixed; inset:0; z-index:3; pointer-events:none; display:block; opacity:.3; mix-blend-mode:screen; background:radial-gradient(520px circle at var(--sx,50%) var(--sy,50%), var(--cyan-glow), transparent 70%)}
 @media (prefers-reduced-motion:reduce){ .spotlight{display:none !important} }
 
@@ -118,7 +140,7 @@ body::after{
   display:flex; align-items:center; gap:.55rem;
 }
 .eyebrow::before{content:""; width:7px; height:7px; background:var(--cyan); box-shadow:0 0 12px 2px var(--cyan-glow); flex-shrink:0}
-section{position:relative; padding-block:clamp(3.8rem,9vw,6.8rem)}
+section{position:relative; padding-block:clamp(2.6rem,6vw,4.6rem)}
 p{color:var(--fg-dim); max-width:62ch}
 p.lede{color:var(--fg); font-size:1.12rem; max-width:58ch}
 .section-h{font-size:clamp(1.8rem,4.2vw,2.6rem); font-weight:700; letter-spacing:-.02em; line-height:1.06}
@@ -147,8 +169,8 @@ header.top nav a:hover{color:var(--cyan); border-color:var(--cyan)}
 
 /* ---- hero ---- */
 .hero{overflow:hidden; padding-top:clamp(1.4rem,6vw,2.6rem)}
-.hero-stage{position:relative; border-radius:12px; overflow:hidden; min-height:min(90vw,600px); display:flex; align-items:flex-end}
-#netCanvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+.hero-stage{position:relative; left:50%; right:50%; margin-left:-50vw; margin-right:-50vw; width:100vw; overflow:hidden; min-height:min(90vw,600px); display:flex; align-items:flex-end}
+.hero-copy-wrap{width:100%}
 .hero-scrim{position:absolute; inset:0; background:linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--bg) 60%, transparent) 58%, var(--bg) 97%)}
 .hero-copy{position:relative; z-index:2; padding:clamp(1.8rem,5vw,3.4rem); width:100%}
 .kicker{font-family:"IBM Plex Mono",monospace; font-size:.8rem; letter-spacing:.22em; text-transform:uppercase; color:var(--violet); margin-bottom:1.1rem; display:block}
@@ -173,7 +195,7 @@ header.top nav a:hover{color:var(--cyan); border-color:var(--cyan)}
 .btn{
   --mx:50%; --my:50%; position:relative; overflow:hidden;
   display:inline-flex; align-items:center; gap:.5rem;
-  background:var(--cyan); color:#021014; text-decoration:none;
+  background:var(--cyan); color:#1a1304; text-decoration:none;
   font-family:"IBM Plex Mono",monospace; font-size:.85rem; font-weight:600;
   padding:.9rem 1.4rem; border-radius:3px; letter-spacing:.02em;
   box-shadow:0 0 0 0 var(--cyan-glow); transition:box-shadow .25s, transform .2s;
@@ -304,8 +326,8 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-<div class="aurora" id="aurora" aria-hidden="true"><span class="b1"></span><span class="b2"></span></div>
+</head>
+<body>
 <div class="spotlight" id="spotlight" aria-hidden="true"></div>
 
 <div class="content">
@@ -322,11 +344,10 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <div class="hero-stage hud">
-      <span class="c3"></span><span class="c4"></span>
-      <canvas id="netCanvas" aria-hidden="true"></canvas>
-      <div class="hero-scrim"></div>
+  <div class="hero-stage hud">
+    <span class="c3"></span><span class="c4"></span>
+    <div class="hero-scrim"></div>
+    <div class="hero-copy-wrap wrap">
       <div class="hero-copy">
         <span class="kicker">// Future Formation Intelligence</span>
         <h1>
@@ -341,6 +362,8 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
         </div>
       </div>
     </div>
+  </div>
+  <div class="wrap">
     <div class="cta-row">
       <a class="btn" id="ctaMain" href="mailto:contact@bcsentinel.ai">Institutional inquiry →</a>
       <a class="btn ghost" href="#architecture">See the architecture</a>
@@ -384,6 +407,7 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
       <div class="stat"><b data-count="15">0</b><span>architecture decision records</span></div>
       <div class="stat"><b data-count="12">0</b><span>conceptual design specifications</span></div>
       <div class="stat"><b data-count="21">0</b><span>system architecture specifications</span></div>
+      <div class="stat"><b data-count="187">0</b><span>formations investigated — Ethereum mainnet</span></div>
     </div>
 
     <div class="verify-grid">
@@ -397,7 +421,7 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
           <li>Contract-creation check — catches deployments with no destination address, including EIP-1167 minimal-proxy clones</li>
         </ul>
         <p style="margin-top:.8rem">Every wallet in our calibration set carries a direct, timestamped investigate_wallet output file — the pipeline's own evidence trail, generated as it runs, not a label applied after the fact.</p>
-        <p style="margin-top:.8rem">Scope today: Ethereum mainnet (Layer 1) — 187 formations investigated in depth. The engine itself already supports Base, Arbitrum and Optimism; extending our calibration to those chains with the same rigor is active, ongoing work.</p>
+        <p style="margin-top:.8rem">Scope today: Ethereum mainnet (Layer 1) — 187 formations investigated in depth, with live detection already running against our calibrated signal set.</p>
       </div>
       <div class="verify-card glass hud"><span class="c3"></span><span class="c4"></span>
         <h3>Confidence Engine — evidence reliability</h3>
@@ -632,19 +656,32 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
   // ---- scramble-in reveal for hero headline ----
   var glines = document.querySelectorAll('.hero h1 .gline');
   if(glines.length && !reduceMotion){
-    var SCRAMBLE_CHARS = '01#$%&*ABCDEFGHJKLMNPQRSTUVWXYZ';
+    // split-flap character set (old airport/train departure board):
+    // each not-yet-settled letter cycles through this sequence every tick,
+    // and letters lock into place left-to-right as the board "catches up".
+    var FLAP_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     function scrambleIn(el, delay){
       var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
       var textNodes = []; var tn;
       while(tn = walker.nextNode()){ textNodes.push({node: tn, original: tn.textContent}); }
       setTimeout(function(){
-        var frame = 0, totalFrames = 11;
+        var cursors = textNodes.map(function(entry){
+          return entry.original.split('').map(function(){ return Math.floor(Math.random()*FLAP_CHARS.length); });
+        });
+        var frame = 0, totalFrames = 30;
         var iv = setInterval(function(){
-          textNodes.forEach(function(entry){
+          textNodes.forEach(function(entry, ni){
             var original = entry.original, len = original.length, out = '';
+            var lockedUpto = (frame/totalFrames)*len;
             for(var i=0;i<len;i++){
-              if(original[i] === ' '){ out += ' '; continue; }
-              out += (i < (frame/totalFrames)*len) ? original[i] : SCRAMBLE_CHARS[Math.floor(Math.random()*SCRAMBLE_CHARS.length)];
+              var ch = original[i];
+              if(ch === ' '){ out += ' '; continue; }
+              if(i < lockedUpto){
+                out += ch;
+              } else {
+                cursors[ni][i] = (cursors[ni][i] + 1) % FLAP_CHARS.length;
+                out += FLAP_CHARS[cursors[ni][i]];
+              }
             }
             entry.node.textContent = out;
           });
@@ -653,10 +690,10 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
             textNodes.forEach(function(entry){ entry.node.textContent = entry.original; });
             clearInterval(iv);
           }
-        }, 26);
+        }, 70);
       }, delay);
     }
-    glines.forEach(function(el, idx){ scrambleIn(el, 480 + idx*260); });
+    glines.forEach(function(el, idx){ scrambleIn(el, 480 + idx*450); });
   }
 
   // ---- reveal-on-scroll ----
@@ -736,18 +773,6 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
     if(dEl) dio.observe(dEl);
   } else { drawDonut(); }
 
-  // ---- aurora parallax ----
-  var aurora = document.getElementById('aurora');
-  if(aurora && !reduceMotion){
-    var ticking = false;
-    window.addEventListener('scroll', function(){
-      if(!ticking){
-        requestAnimationFrame(function(){ aurora.style.transform = 'translateY(' + (window.scrollY * 0.18) + 'px)'; ticking = false; });
-        ticking = true;
-      }
-    });
-  }
-
   // ---- live signal feed typewriter ----
   var feedEl = document.getElementById('feedLines');
   var SCRIPT = [
@@ -787,97 +812,7 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
     }
   }
 
-  // ---- hero network canvas ----
-  var canvas = document.getElementById('netCanvas');
-  if(canvas && canvas.getContext){
-    var ctx = canvas.getContext('2d');
-    var wrap = canvas.parentElement;
-    var W=0, H=0, DPR = Math.min(window.devicePixelRatio || 1, 2);
-    var nodes = [];
-    var N = 64;
-    var shots = [];
-
-    function getCol(){
-      var cs = getComputedStyle(document.documentElement);
-      return { cyan: cs.getPropertyValue('--cyan').trim()||'#2bf0e0', violet: cs.getPropertyValue('--violet').trim()||'#a56bff', line: cs.getPropertyValue('--panel-line').trim()||'#1a212b' };
-    }
-    function resize(){
-      W = wrap.clientWidth; H = wrap.clientHeight;
-      canvas.width = W*DPR; canvas.height = H*DPR; canvas.style.width=W+'px'; canvas.style.height=H+'px';
-      ctx.setTransform(DPR,0,0,DPR,0,0);
-    }
-    function initNodes(){
-      nodes = [];
-      for(var i=0;i<N;i++){ nodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.55,vy:(Math.random()-.5)*.55,r:1.1+Math.random()*1.7,flash:0}); }
-    }
-    function hexA(hex,a){ if(hex.indexOf('#')!==0) return hex; var h=hex.replace('#',''); if(h.length===3) h=h.split('').map(function(c){return c+c;}).join(''); var r=parseInt(h.substr(0,2),16),gg=parseInt(h.substr(2,2),16),b=parseInt(h.substr(4,2),16); return 'rgba('+r+','+gg+','+b+','+a+')'; }
-    function draw(){
-      var col = getCol();
-      ctx.clearRect(0,0,W,H);
-      ctx.globalCompositeOperation = 'lighter';
-
-      nodes.forEach(function(n){
-        var boost = n.flash || 0;
-        var rr = n.r + boost*2.8;
-        ctx.beginPath();
-        ctx.fillStyle = hexA(col.cyan, .2 + boost*.6);
-        ctx.shadowColor = col.cyan; ctx.shadowBlur = 3 + boost*10;
-        ctx.arc(n.x, n.y, rr, 0, Math.PI*2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      });
-
-      shots.forEach(function(sh){
-        var tailLen = 50;
-        var tx = sh.x - sh.dx*tailLen, ty = sh.y - sh.dy*tailLen;
-        var grad = ctx.createLinearGradient(tx, ty, sh.x, sh.y);
-        grad.addColorStop(0, hexA(sh.color, 0));
-        grad.addColorStop(1, hexA(sh.color, sh.alpha));
-        ctx.beginPath();
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 1.1;
-        ctx.shadowColor = sh.color; ctx.shadowBlur = 8;
-        ctx.moveTo(tx, ty);
-        ctx.lineTo(sh.x, sh.y);
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-        ctx.beginPath(); ctx.fillStyle = hexA(sh.color, sh.alpha); ctx.shadowColor = sh.color; ctx.shadowBlur = 10;
-        ctx.arc(sh.x, sh.y, 1.5, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0;
-      });
-
-      ctx.globalCompositeOperation = 'source-over';
-    }
-    function tick(){
-      nodes.forEach(function(n){
-        n.x+=n.vx; n.y+=n.vy;
-        if(n.x<0||n.x>W) n.vx*=-1;
-        if(n.y<0||n.y>H) n.vy*=-1;
-        n.flash = (n.flash || 0) * .87;
-      });
-      if(!reduceMotion && shots.length < 3 && nodes.length && Math.random() < .035){
-        var origin = nodes[Math.floor(Math.random()*nodes.length)];
-        var ang = Math.random()*Math.PI*2;
-        var pc = getCol();
-        shots.push({ x:origin.x, y:origin.y, dx:Math.cos(ang), dy:Math.sin(ang), speed:3+Math.random()*1.6, age:0, life:95, alpha:.9, color:(Math.random()<.5?pc.cyan:pc.violet) });
-      }
-      shots.forEach(function(sh){
-        sh.x += sh.dx*sh.speed;
-        sh.y += sh.dy*sh.speed;
-        sh.age++;
-        var lifeT = sh.age/sh.life;
-        sh.alpha = .9 * (1 - Math.max(0, (lifeT-0.65)/0.35));
-        nodes.forEach(function(n){
-          var ddx=n.x-sh.x, ddy=n.y-sh.y;
-          if(ddx*ddx+ddy*ddy < 170){ n.flash = Math.min(1, (n.flash||0) + .9); }
-        });
-      });
-      shots = shots.filter(function(sh){ return sh.age < sh.life && sh.x > -80 && sh.x < W+80 && sh.y > -80 && sh.y < H+80; });
-      draw();
-      if(!reduceMotion) requestAnimationFrame(tick);
-    }
-    resize(); initNodes(); draw();
-    if(!reduceMotion){ requestAnimationFrame(tick); }
-    window.addEventListener('resize', function(){ resize(); draw(); });
-  }
 })();
 </script>
+</body>
+</html>
