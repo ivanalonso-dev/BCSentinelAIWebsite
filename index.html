@@ -173,7 +173,6 @@ header.top nav a:hover{color:var(--cyan); border-color:var(--cyan)}
 .hero-copy-wrap{width:100%}
 .hero-scrim{position:absolute; inset:0; background:linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--bg) 60%, transparent) 58%, var(--bg) 97%)}
 .hero-copy{position:relative; z-index:2; padding:clamp(1.8rem,5vw,3.4rem); width:100%}
-.kicker{font-family:"IBM Plex Mono",monospace; font-size:.8rem; letter-spacing:.22em; text-transform:uppercase; color:var(--violet); margin-bottom:1.1rem; display:block}
 .hero h1{font-size:clamp(1.9rem,4.4vw,3rem); font-weight:700; line-height:1.18; letter-spacing:-.015em; max-width:36ch}
 .hero h1 .gline{display:block; opacity:0; transform:translateY(.4em); animation:lineUp .8s cubic-bezier(.2,.7,.2,1) forwards}
 .hero h1 .gline:nth-child(1){animation-delay:.05s}
@@ -212,6 +211,7 @@ header.top nav a:hover{color:var(--cyan); border-color:var(--cyan)}
 .feed-cap .live{color:var(--cyan)}
 #feedLines{font-family:"IBM Plex Mono",monospace; font-size:.78rem; line-height:1.9; min-height:5.2rem; color:var(--fg-dim)}
 #feedLines .ln{display:block; white-space:pre}
+@media (max-width:640px){ #feedLines{font-size:.54rem; line-height:1.7} }
 #feedLines .ln .k{color:var(--cyan)}
 #feedLines .ln .v{color:var(--fg)}
 #feedLines .cursor{display:inline-block; width:7px; height:1em; background:var(--cyan); vertical-align:text-bottom; animation:blink 1s step-end infinite}
@@ -280,6 +280,11 @@ header.top nav a:hover{color:var(--cyan); border-color:var(--cyan)}
 .hash-chain .blk{padding:.5rem .7rem; background:var(--bg-raised); border:1px solid var(--glass-brd); border-radius:4px}
 .hash-chain .blk.now{color:var(--cyan); border-color:var(--cyan); box-shadow:0 0 12px -2px var(--cyan-glow)}
 .hash-chain .arrow{padding:0 .5rem; color:var(--mono-dim)}
+@media (max-width:560px){
+  .hash-chain{flex-wrap:nowrap; font-size:.52rem}
+  .hash-chain .blk{padding:.35rem .4rem}
+  .hash-chain .arrow{padding:0 .25rem}
+}
 @media (max-width:680px){ .verify-grid{grid-template-columns:1fr} }
 
 /* ---- audience ---- */
@@ -349,7 +354,6 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
     <div class="hero-scrim"></div>
     <div class="hero-copy-wrap wrap">
       <div class="hero-copy">
-        <span class="kicker">// Future Formation Intelligence</span>
         <h1>
           <span class="gline">BCSentinel is a future formation intelligence platform</span>
           <span class="gline">that detects formation processes before their public visibility,</span>
@@ -440,7 +444,7 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
     <div class="gen-list">
       <div class="gen-item glass"><span class="id">SEL</span><span><span class="name">Selector Library — 654 calibrated selectors</span><span class="status done">production</span></span></div>
       <div class="gen-item glass"><span class="id">ANTI</span><span><span class="name">Anti-Signal Library</span><span class="status done">production</span></span></div>
-      <div class="gen-item glass"><span class="id">INFRA</span><span><span class="name">Infrastructure Selector Library</span><span class="status draft">draft — pending validation threshold</span></span></div>
+      <div class="gen-item glass"><span class="id">INFRA</span><span><span class="name">Infrastructure Selector Library</span><span class="status done">production</span></span></div>
     </div>
 
     <p class="docket-note">A library only moves from draft to production once it clears a fixed validation threshold against real cases — we don't promote a pattern library on vibes. In parallel, a set of active prospective investigations is validating this architecture against formations happening right now, not just against history.</p>
@@ -480,6 +484,7 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
       <div class="verify-card glass hud"><span class="c3"></span><span class="c4"></span>
         <h3>Cryptographic sealing</h3>
         <p>Starting this cycle, every new formation we begin tracking is sealed the moment we see it — a hash of the case record, chained to the one sealed before it, with a timestamp. If that formation becomes public later, anyone can recompute the hash and confirm it matches what we sealed.</p>
+        <div class="feed-cap" style="margin-top:1.1rem; margin-bottom:.4rem"><span>Chain format — illustrative, not a sealed case</span></div>
         <div class="hash-chain">
           <span class="blk">000000…0000</span><span class="arrow">→</span>
           <span class="blk">0b88f4…1a7c</span><span class="arrow">→</span>
@@ -584,6 +589,7 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
 
 <footer>
   <span>BCSentinel — developed by EMERGE</span>
+  <span><a href="/privacy.html" style="color:inherit">Privacy Policy</a> · <a href="/cookies.html" style="color:inherit">Cookie Policy</a></span>
   <span>Future Formation Intelligence</span>
 </footer>
 </div>
