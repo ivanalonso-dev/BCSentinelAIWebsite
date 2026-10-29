@@ -659,48 +659,9 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
     });
   }
 
-  // ---- scramble-in reveal for hero headline ----
-  var glines = document.querySelectorAll('.hero h1 .gline');
-  if(glines.length && !reduceMotion){
-    // split-flap character set (old airport/train departure board):
-    // each not-yet-settled letter cycles through this sequence every tick,
-    // and letters lock into place left-to-right as the board "catches up".
-    var FLAP_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    function scrambleIn(el, delay){
-      var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
-      var textNodes = []; var tn;
-      while(tn = walker.nextNode()){ textNodes.push({node: tn, original: tn.textContent}); }
-      setTimeout(function(){
-        var cursors = textNodes.map(function(entry){
-          return entry.original.split('').map(function(){ return Math.floor(Math.random()*FLAP_CHARS.length); });
-        });
-        var frame = 0, totalFrames = 30;
-        var iv = setInterval(function(){
-          textNodes.forEach(function(entry, ni){
-            var original = entry.original, len = original.length, out = '';
-            var lockedUpto = (frame/totalFrames)*len;
-            for(var i=0;i<len;i++){
-              var ch = original[i];
-              if(ch === ' '){ out += ' '; continue; }
-              if(i < lockedUpto){
-                out += ch;
-              } else {
-                cursors[ni][i] = (cursors[ni][i] + 1) % FLAP_CHARS.length;
-                out += FLAP_CHARS[cursors[ni][i]];
-              }
-            }
-            entry.node.textContent = out;
-          });
-          frame++;
-          if(frame > totalFrames){
-            textNodes.forEach(function(entry){ entry.node.textContent = entry.original; });
-            clearInterval(iv);
-          }
-        }, 70);
-      }, delay);
-    }
-    glines.forEach(function(el, idx){ scrambleIn(el, 480 + idx*450); });
-  }
+  // ---- hero headline: letters appear directly, no scramble/decode reveal ----
+  // (Eliminado a peticion de Ivan, 29-oct-2026: el titular debe mostrarse
+  // directamente, sin la animacion de letras "descubriendose" letra a letra.)
 
   // ---- reveal-on-scroll ----
   var revealEls = document.querySelectorAll('.stat, .method-card, .verify-card, .aud-row, .gen-item, .radial-wrap');
