@@ -165,6 +165,8 @@ header.top .mark b{color:var(--cyan); font-family:"Bricolage Grotesque",sans-ser
 header.top nav{display:flex; gap:1.6rem; color:var(--fg-dim)}
 header.top nav a{text-decoration:none; border-bottom:1px solid transparent; transition:color .15s}
 header.top nav a:hover{color:var(--cyan); border-color:var(--cyan)}
+header.top .mark-icon{display:flex; align-items:center; flex-shrink:0}
+header.top .mark-icon svg{display:block; height:20px; width:auto}
 @media (max-width:640px){ header.top nav{display:none} }
 
 /* ---- hero ---- */
@@ -354,6 +356,12 @@ footer{padding-block:2.6rem; max-width:960px; margin:0 auto; font-family:"IBM Pl
     <a href="#audience">Who it's for</a>
     <a href="#contact">Contact</a>
   </nav>
+  <div class="mark-icon" aria-hidden="true">
+    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+      <path d="M90,200 L200,90 L310,200" fill="none" stroke="var(--cyan)" stroke-width="40" stroke-linejoin="miter" stroke-linecap="butt"/>
+      <path d="M90,344 L200,234 L310,344" fill="none" stroke="var(--violet)" stroke-width="40" stroke-linejoin="miter" stroke-linecap="butt"/>
+    </svg>
+  </div>
 </header>
 
 <section class="hero">
