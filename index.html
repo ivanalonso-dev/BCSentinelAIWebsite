@@ -206,12 +206,20 @@ header.top nav a:hover{color:var(--cyan); border-color:var(--cyan)}
 .btn.ghost:hover{border-color:var(--violet); color:var(--violet)}
 
 /* ---- live signal feed (hero terminal) ---- */
-.feed-wrap{margin-top:2.2rem; padding:1.1rem 1.3rem; max-width:620px}
-.feed-cap{font-family:"IBM Plex Mono",monospace; font-size:.68rem; letter-spacing:.1em; color:var(--fg-dim); text-transform:uppercase; margin-bottom:.6rem; display:flex; justify-content:space-between}
+.feed-wrap{margin-top:2.2rem; padding:1.1rem 1.3rem; max-width:620px; width:100%; overflow:hidden}
+.feed-cap{font-family:"IBM Plex Mono",monospace; font-size:.68rem; letter-spacing:.1em; color:var(--fg-dim); text-transform:uppercase; margin-bottom:.6rem; display:flex; flex-wrap:wrap; gap:.3rem .6rem; justify-content:space-between}
 .feed-cap .live{color:var(--cyan)}
-#feedLines{font-family:"IBM Plex Mono",monospace; font-size:.78rem; line-height:1.9; min-height:5.2rem; color:var(--fg-dim)}
-#feedLines .ln{display:block; white-space:pre}
-@media (max-width:640px){ #feedLines{font-size:.54rem; line-height:1.7} }
+#feedLines{font-family:"IBM Plex Mono",monospace; font-size:.78rem; line-height:1.9; min-height:5.2rem; color:var(--fg-dim); max-width:100%}
+#feedLines .ln{display:block; white-space:pre; max-width:100%; overflow-wrap:break-word}
+@media (max-width:640px){
+  .feed-cap{font-size:.6rem}
+  #feedLines{font-size:.54rem; line-height:1.7}
+  /* En movil las lineas monoespaciadas mas largas no caben en una sola fila:
+     que envuelvan dentro de la caja en vez de salirse de ella (pedido de
+     Ivan, 29-oct-2026). */
+  #feedLines .ln{white-space:pre-wrap; word-break:break-word}
+}
+@media (max-width:400px){ #feedLines{font-size:.48rem} }
 #feedLines .ln .k{color:var(--cyan)}
 #feedLines .ln .v{color:var(--fg)}
 #feedLines .cursor{display:inline-block; width:7px; height:1em; background:var(--cyan); vertical-align:text-bottom; animation:blink 1s step-end infinite}
